@@ -1,40 +1,59 @@
 <template>
   <Layout>
     <v-tabs v-model="tab" grow>
-      <v-tab>Item One</v-tab>
-      <v-tab>Item Two</v-tab>
-      <v-tab>Item Three</v-tab>
+      <v-tab>All Events</v-tab>
+      <v-tab>Live Music</v-tab>
+      <v-tab>Coding Events</v-tab>
     </v-tabs>
-    <v-card class="mx-auto" max-width="400">
-      <v-img
-        class="white--text align-end"
-        height="200px"
-        src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
-      />
-      <v-card-subtitle class="pb-0">
-        Number 10
-      </v-card-subtitle>
+    <v-row class="justify-space-around">
+      <v-card 
+        v-for="edge in events" :key="edge.node.id"
+        width="280"
+        class="mt-5"
+      >
+        <v-img
+          class="white--text align-end"
+          height="200px"
+          src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+        />
+        <v-card-title>{{edge.node.title}}</v-card-title>
+        <v-card-subtitle class="pb-0">
+          {{formatDate(edge.node.date)}}
+        </v-card-subtitle>
 
-      <v-card-text class="text--primary">
-        <div>Whitehaven Beach</div>
 
-        <div>Whitsunday Island, Whitsunday Islands</div>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-btn color="orange" text>
-          Share
-        </v-btn>
-
-        <v-btn color="orange" text>
-          Explore
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-card-actions>
+          <v-btn color="orange" text>
+            More Detail
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-row>
   </Layout>
 </template>
 
+<page-query>
+query {
+  events: allEvents {
+    edges {
+      node {
+        id
+        title
+        description
+        price
+        duration
+        date
+        category
+      }
+    }
+  }
+}
+
+</page-query>
+
 <script>
+import moment from 'moment'
+
 export default {
   metaInfo: {
     title: "Hello, world!",
@@ -42,23 +61,32 @@ export default {
   data() {
     return {
       tab: 0,
+      events: []
     };
+  },
+  mounted() {
+    this.events = this.$page.events.edges
   },
   watch: {
     tab(val) {
       if (val === 0) {
-        this.showAllEvents()
+        this.showAllEvents() 
       } else {
-        this.showEventsByType()
+        this.showEventsByType(val)
       }
     }
   },
   methods: {
     showAllEvents() {
-      console.log('all')
+      this.events = this.$page.events.edges
     },
-    showEventsByType() { 
-      console.log('type')
+    showEventsByType(val) { 
+      this.events = this.$page.events.edges.filter((edge) => {
+        return edge.node.category === val
+      })
+    },
+    formatDate(date) {
+      return moment(date).format('MMMM Do YYYY, h:mm a')
     }
   }
 };
