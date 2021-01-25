@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <Layout v-slot="{searchText}" >
     <v-tabs v-model="tab" grow>
       <v-tab>All Events</v-tab>
       <v-tab>Live Music</v-tab>
@@ -7,7 +7,7 @@
     </v-tabs>
     <v-row class="justify-space-around">
       <v-card 
-        v-for="edge in events" :key="edge.node.id"
+        v-for="edge in getEvents(searchText)" :key="edge.node.id"
         width="280"
         class="mt-5"
       >
@@ -21,9 +21,8 @@
           {{formatDate(edge.node.date)}}
         </v-card-subtitle>
 
-
         <v-card-actions>
-          <v-btn color="orange" text>
+          <v-btn @click="$router.push(`/events/${edge.node.id}`)" color="orange" text>
             More Detail
           </v-btn>
         </v-card-actions>
@@ -87,6 +86,11 @@ export default {
     },
     formatDate(date) {
       return moment(date).format('MMMM Do YYYY, h:mm a')
+    },
+    getEvents(searchText) {
+      return this.events.filter((edge) => {
+        return edge.node.title.toLowerCase().includes(searchText.toLowerCase())
+      })
     }
   }
 };
